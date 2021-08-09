@@ -9,16 +9,46 @@ exports.register = asyncHandler(async (req, res, next) => {
 	const { name, email, password, fullName } = req.body;
 
 	const hasEmail = await User.findOne({ email });
-	if (hasEmail) res.status(401).json({ message: "Email already registered" });
+	if (hasEmail)
+		res.json({
+			success: false,
+			message: `Email ${email} belongs to another account.`,
+		});
 
 	const hasName = await User.findOne({ name });
 	if (!hasEmail && hasName)
-		res.status(401).json({ message: "Name already registered" });
+		res.json({
+			success: false,
+			message: "Username not available. Choose another one.",
+		});
 
 	if (!hasEmail && !hasName) {
 		const user = await User.create({ name, email, password, fullName });
 
 		res.status(200).json({ message: "User Created", user: user });
+	}
+});
+
+//@desc     Check if email or username in DB
+//@route    POST /api/v1/auth/checkemailname
+//@access   Public
+exports.checkEmailName = asyncHandler(async (req, res, next) => {
+	const { type, value } = req.body;
+
+	if (type === "email") {
+		const hasEmail = await User.findOne({ email: value });
+		if (hasEmail) {
+			res.json({ success: false, message: "Email already registered" });
+		} else {
+			res.json({ success: true, message: "Available" });
+		}
+	} else if (type === "name") {
+		const hasName = await User.findOne({ name: value });
+		if (hasName) {
+			res.json({ success: false, message: "Name already registered" });
+		} else {
+			res.json({ success: true, message: "Available" });
+		}
 	}
 });
 
