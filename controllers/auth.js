@@ -49,7 +49,10 @@ exports.login = asyncHandler(async (req, res, next) => {
 		}
 	}
 	console.log(user.password);
-	const isMatch = user.password === password;
+	// const isMatch = user.password === password;
+
+	// Check if password matches
+	const isMatch = await user.matchPassword(password);
 
 	if (!isMatch) {
 		return res.json({
