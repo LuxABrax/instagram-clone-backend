@@ -6,6 +6,8 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/error");
 const cookieParser = require("cookie-parser");
+const fileUpload = require("express-fileupload");
+const path = require("path");
 
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -30,6 +32,12 @@ app.use(express.json());
 // if (process.env.NODE_ENV === "development") {
 // 	app.use(morgan("dev"));
 // }
+
+// File upload
+app.use(fileUpload());
+
+// Set static folder
+app.use(express.static(path.join(__dirname, "public")));
 
 // Routers
 app.use("/api/v1/auth", auth);

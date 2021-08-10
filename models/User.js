@@ -32,6 +32,10 @@ const UserSchema = new mongoose.Schema({
 	posts: { type: Number, default: 0 },
 	followers: { type: Number, default: 0 },
 	following: { type: Number, default: 0 },
+	photo: {
+		type: String,
+		default: "no-photo.jpg",
+	},
 	role: {
 		type: String,
 		enum: ["user", "publisher"],
