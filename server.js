@@ -14,6 +14,8 @@ dotenv.config({ path: "./config/config.env" });
 connectDB();
 
 const auth = require("./routes/auth");
+const users = require("./routes/users");
+const followers = require("./routes/followers");
 
 const app = express();
 
@@ -31,6 +33,8 @@ app.use(express.json());
 
 // Routers
 app.use("/api/v1/auth", auth);
+app.use("/api/v1/users", users);
+app.use("/api/v1/follow", followers);
 
 app.use(errorHandler);
 
