@@ -52,9 +52,9 @@ exports.followUser = asyncHandler(async (req, res, next) => {
 });
 
 // @desc        Get users that are followed by user
-// @route       GET /api/v1/follow/following
+// @route       GET /api/v1/follow/followed
 // @access      Public
-exports.getFollowingUsers = asyncHandler(async (req, res, next) => {
+exports.getFollowedUsers = asyncHandler(async (req, res, next) => {
 	const { userId } = req.body;
 
 	const userInfo = await UserInfo.findById(userId);
@@ -72,10 +72,11 @@ exports.getFollowingUsers = asyncHandler(async (req, res, next) => {
 });
 
 // @desc        Get users that are not followed by user
-// @route       GET /api/v1/follow/notfollowing
+// @route       GET /api/v1/follow/notfollowed
 // @access      Public
-exports.getNotFollowingUsers = asyncHandler(async (req, res, next) => {
+exports.getNotFollowedUsers = asyncHandler(async (req, res, next) => {
 	const { userId } = req.body;
+	console.log("userId: ", userId);
 
 	const userInfo = await UserInfo.findById(userId);
 
@@ -83,6 +84,28 @@ exports.getNotFollowingUsers = asyncHandler(async (req, res, next) => {
 	ids.shift();
 
 	const users = await User.find({ _id: { $nin: ids } });
+
+	const newUsers = users.map(user => {
+		return reformatUser(user);
+	});
+
+	res.status(200).json({ success: true, data: newUsers });
+});
+
+// @desc        Get users that are following user
+// @route       GET /api/v1/follow/following
+// @access      Public
+exports.getFollowingUsers = asyncHandler(async (req, res, next) => {
+	const { userId } = req.body;
+
+	const userInfo = await UserInfo.findById(userId);
+	console.log(userInfo);
+	if (userInfo.followed.length === 0)
+		return res.json({ success: false, message: "No users" });
+	const ids = userInfo.followed;
+	ids.shift();
+
+	const users = await User.find({ _id: { $in: ids } });
 
 	const newUsers = users.map(user => {
 		return reformatUser(user);
