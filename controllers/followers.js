@@ -52,12 +52,15 @@ exports.followUser = asyncHandler(async (req, res, next) => {
 });
 
 // @desc        Get users that are followed by user
-// @route       GET /api/v1/follow/followed
+// @route       GET /api/v1/follow/:id/followed
 // @access      Public
 exports.getFollowedUsers = asyncHandler(async (req, res, next) => {
-	const { userId } = req.body;
+	const userId = req.params.id;
 
 	const userInfo = await UserInfo.findById(userId);
+
+	if ((await userInfo.following.length) === 0)
+		return res.json({ success: false, message: "Not following anybody" });
 
 	const ids = userInfo.following;
 	ids.shift();
@@ -68,20 +71,20 @@ exports.getFollowedUsers = asyncHandler(async (req, res, next) => {
 		return reformatUser(user);
 	});
 
-	res.status(200).json({ success: true, data: newUsers });
+	res.status(200).json({ success: true, users: newUsers });
 });
 
 // @desc        Get users that are not followed by user
-// @route       GET /api/v1/follow/notfollowed
+// @route       GET /api/v1/follow/:id/notfollowed
 // @access      Public
 exports.getNotFollowedUsers = asyncHandler(async (req, res, next) => {
-	const { userId } = req.body;
-	console.log("userId: ", userId);
+	const userId = req.params.id;
 
 	const userInfo = await UserInfo.findById(userId);
 
 	const ids = userInfo.following;
 	ids.shift();
+	ids.push(userId);
 
 	const users = await User.find({ _id: { $nin: ids } });
 
@@ -89,20 +92,21 @@ exports.getNotFollowedUsers = asyncHandler(async (req, res, next) => {
 		return reformatUser(user);
 	});
 
-	res.status(200).json({ success: true, data: newUsers });
+	res.status(200).json({ success: true, users: newUsers });
 });
 
 // @desc        Get users that are following user
-// @route       GET /api/v1/follow/following
+// @route       GET /api/v1/follow/:id/following
 // @access      Public
 exports.getFollowingUsers = asyncHandler(async (req, res, next) => {
-	const { userId } = req.body;
+	const userId = req.params.id;
 
 	const userInfo = await UserInfo.findById(userId);
-	console.log(userInfo);
-	if (userInfo.followed.length === 0)
-		return res.json({ success: false, message: "No users" });
-	const ids = userInfo.followed;
+
+	if ((await userInfo.followers.length) === 0)
+		return res.json({ success: false, message: "No followers" });
+
+	const ids = userInfo.followers;
 	ids.shift();
 
 	const users = await User.find({ _id: { $in: ids } });
@@ -111,5 +115,5 @@ exports.getFollowingUsers = asyncHandler(async (req, res, next) => {
 		return reformatUser(user);
 	});
 
-	res.status(200).json({ success: true, data: newUsers });
+	res.status(200).json({ success: true, users: newUsers });
 });
