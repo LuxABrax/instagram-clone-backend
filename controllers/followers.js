@@ -4,17 +4,18 @@ const UserInfo = require("../models/UserInfo");
 const { checkIfFollowing, reformatUser } = require("../helpers/followers");
 
 // @desc        Follow another user
-// @route       PUT /api/v1/follow
+// @route       PUT /api/v1/follow/:id/:fid
 // @access      Public
 exports.followUser = asyncHandler(async (req, res, next) => {
-	const { userId, followId } = req.body;
-	const uId = { _id: userId };
-	const fId = { _id: followId };
+	const { id, fid } = req.params;
+	console.log(id, fid);
+	const uId = { _id: id };
+	const fId = { _id: fid };
 
-	if (userId === followId)
+	if (id === fid)
 		return res.json({ success: false, message: "ID's are identical" });
 
-	const isFollowing = await checkIfFollowing(userId, followId);
+	const isFollowing = await checkIfFollowing(id, fid);
 
 	if (isFollowing)
 		return res.json({
@@ -22,8 +23,8 @@ exports.followUser = asyncHandler(async (req, res, next) => {
 			message: "You are already following this user.",
 		});
 
-	const user1 = await User.findById(userId);
-	const user2 = await User.findById(followId);
+	const user1 = await User.findById(id);
+	const user2 = await User.findById(fid);
 
 	const following = user1.following + 1;
 	const followers = user2.followers + 1;
@@ -37,12 +38,12 @@ exports.followUser = asyncHandler(async (req, res, next) => {
 
 	const userInfo = await UserInfo.findOneAndUpdate(
 		uId,
-		{ $addToSet: { following: [followId] } },
+		{ $addToSet: { following: [fid] } },
 		{ new: true }
 	);
 	const followInfo = await UserInfo.findOneAndUpdate(
 		fId,
-		{ $addToSet: { followers: [userId] } },
+		{ $addToSet: { followers: [id] } },
 		{ new: true }
 	);
 
