@@ -27,13 +27,23 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 // @access      Private/Admin
 exports.getUserByName = asyncHandler(async (req, res, next) => {
 	const user = await User.find({ name: req.params.name });
-
-	const { _id, name, fullName, description, posts, followers, following } =
-		user[0];
+	if (user.length === 0)
+		return res.json({ success: false, message: "No user with that name." });
+	const {
+		_id,
+		name,
+		photo,
+		fullName,
+		description,
+		posts,
+		followers,
+		following,
+	} = user[0];
 
 	const returnUser = {
 		_id,
 		name,
+		photo,
 		fullName,
 		description,
 		posts,
@@ -41,7 +51,8 @@ exports.getUserByName = asyncHandler(async (req, res, next) => {
 		following,
 	};
 
-	res.status(200).json({ success: true, data: returnUser });
+	if (user.length !== 0)
+		res.status(200).json({ success: true, data: returnUser });
 });
 
 // @desc        Get single user with name
@@ -123,7 +134,9 @@ exports.uploadProfilePhoto = asyncHandler(async (req, res, next) => {
 	}
 
 	// Create custom filename
-	file.name = `photo_${user._id}${path.parse(file.name).ext}`;
+	const r = Math.floor(Math.random() * 10);
+	console.log(r);
+	file.name = `photo_${user._id}${r}${path.parse(file.name).ext}`;
 
 	file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
 		if (err) {
