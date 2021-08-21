@@ -11,14 +11,23 @@ exports.checkIfFollowing = asyncHandler(async (userId, followId) => {
 });
 
 exports.reformatUser = user => {
-	const { description, posts, followers, following, _id, name, fullName } =
-		user;
+	const {
+		description,
+		photo,
+		posts,
+		followers,
+		following,
+		_id,
+		name,
+		fullName,
+	} = user;
 
 	return {
 		_id,
 		name,
 		fullName,
 		description,
+		photo,
 		posts,
 		followers,
 		following,

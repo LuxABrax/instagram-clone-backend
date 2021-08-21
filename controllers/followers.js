@@ -3,12 +3,110 @@ const User = require("../models/User");
 const UserInfo = require("../models/UserInfo");
 const { checkIfFollowing, reformatUser } = require("../helpers/followers");
 
+// @desc        UnFollow another user
+// @route       PUT /api/v1/follow/unf/:id/:fid
+// @access      Public
+exports.unFollowUser = asyncHandler(async (req, res, next) => {
+	const { id, fid } = req.params;
+	// console.log(id, fid);
+	const uId = { _id: id };
+	const fId = { _id: fid };
+
+	if (id === fid)
+		return res.json({ success: false, message: "ID's are identical" });
+
+	const isFollowing = await checkIfFollowing(id, fid);
+
+	if (!isFollowing)
+		return res.json({
+			success: false,
+			message: "You are not following this user.",
+		});
+
+	const user1 = await User.findById(id);
+	const user2 = await User.findById(fid);
+
+	const following = user1.following - 1;
+	const followers = user2.followers - 1;
+
+	const user = await User.findOneAndUpdate(uId, { following }, { new: true });
+	const follow = await User.findOneAndUpdate(
+		fId,
+		{ followers: followers },
+		{ new: true }
+	);
+
+	const userInfo = await UserInfo.updateOne(
+		uId,
+		{ $pullAll: { following: [fid] } },
+		{ new: true }
+	);
+	const followInfo = await UserInfo.updateOne(
+		fId,
+		{ $pullAll: { followers: [id] } },
+		{ new: true }
+	);
+
+	res
+		.status(200)
+		.json({ success: true, data: { user, userInfo, follow, followInfo } });
+});
+
+// @desc        Remove Follower
+// @route       PUT /api/v1/follow/rf/:id/:fid
+// @access      Public
+exports.removeFollowUser = asyncHandler(async (req, res, next) => {
+	const { id, fid } = req.params;
+	// console.log(id, fid);
+	const uId = { _id: id };
+	const fId = { _id: fid };
+
+	if (id === fid)
+		return res.json({ success: false, message: "ID's are identical" });
+
+	const isFollowing = await checkIfFollowing(id, fid);
+
+	if (!isFollowing)
+		return res.json({
+			success: false,
+			message: "You are not followed by this user.",
+		});
+
+	const user1 = await User.findById(id);
+	const user2 = await User.findById(fid);
+
+	const followers = user1.followers - 1;
+	const following = user2.following - 1;
+
+	const user = await User.findOneAndUpdate(uId, { followers }, { new: true });
+	const follow = await User.findOneAndUpdate(
+		fId,
+		{ following: following },
+		{ new: true }
+	);
+
+	const userInfo = await UserInfo.updateOne(
+		uId,
+		{ $pullAll: { followers: [fid] } },
+		{ new: true }
+	);
+	const followInfo = await UserInfo.updateOne(
+		fId,
+		{ $pullAll: { following: [id] } },
+		{ new: true }
+	);
+
+	res
+		.status(200)
+		.json({ success: true, data: { user, userInfo, follow, followInfo } });
+});
+
 // @desc        Follow another user
 // @route       PUT /api/v1/follow/:id/:fid
 // @access      Public
 exports.followUser = asyncHandler(async (req, res, next) => {
 	const { id, fid } = req.params;
-	console.log(id, fid);
+	// console.log(id, fid);
 	const uId = { _id: id };
 	const fId = { _id: fid };
 
