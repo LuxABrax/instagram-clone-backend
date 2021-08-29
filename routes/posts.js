@@ -16,6 +16,7 @@ const {
 	addSave,
 	removeSave,
 	getSavedPosts,
+	addComment,
 } = require("../controllers/posts");
 
 const router = express.Router();
@@ -30,6 +31,7 @@ router.route("/like/:id/:uid").put(addLike);
 router.route("/dislike/:id/:uid").put(removeLike);
 router.route("/save/:id/:uid").put(addSave);
 router.route("/unsave/:id/:uid").put(removeSave);
+router.route("/comment/:id").put(addComment);
 router.route("/:id").get(getPost);
 
 // router.route("/n/:name").get(getUserByName);

@@ -200,3 +200,29 @@ exports.removeSave = asyncHandler(async (req, res, next) => {
 
 	res.status(200).json({ success: true, data: nPost });
 });
+
+// @desc        Add Comment
+// @route       PUT /api/v1/posts/comment/:id
+// @access      Private
+exports.addComment = asyncHandler(async (req, res, next) => {
+	const id = req.params.id;
+	const { cid, uid, name, text } = req.body;
+	const post = await Post.findById(id);
+
+	// add created at and comment id ////
+	const comment = {
+		cId: cid,
+		uId: uid,
+		uName: name,
+		text,
+		createdAt: Date.now(),
+	};
+
+	post.comments.push(JSON.stringify(comment));
+
+	const nPost = await Post.findByIdAndUpdate(id, post, { new: true });
+
+	if (!nPost) return res.json({ success: false, message: "No post" });
+
+	res.status(200).json({ success: true, data: nPost });
+});
