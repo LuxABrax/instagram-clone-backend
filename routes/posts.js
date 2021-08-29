@@ -13,6 +13,9 @@ const {
 	getPostsFromFollowing,
 	addLike,
 	removeLike,
+	addSave,
+	removeSave,
+	getSavedPosts,
 } = require("../controllers/posts");
 
 const router = express.Router();
@@ -22,8 +25,11 @@ const router = express.Router();
 router.route("/post/:id").post(uploadPhotoPost);
 router.route("/profile/:id").get(getPosts);
 router.route("/following/:id").get(getPostsFromFollowing);
+router.route("/saved/:id").get(getSavedPosts);
 router.route("/like/:id/:uid").put(addLike);
 router.route("/dislike/:id/:uid").put(removeLike);
+router.route("/save/:id/:uid").put(addSave);
+router.route("/unsave/:id/:uid").put(removeSave);
 router.route("/:id").get(getPost);
 
 // router.route("/n/:name").get(getUserByName);

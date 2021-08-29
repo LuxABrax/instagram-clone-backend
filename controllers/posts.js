@@ -95,6 +95,23 @@ exports.getPostsFromFollowing = asyncHandler(async (req, res, next) => {
 	res.status(200).json({ success: true, data: posts });
 });
 
+// @desc        Get Saved posts
+// @route       GET /api/v1/posts/saved/:id
+// @access      Private
+exports.getSavedPosts = asyncHandler(async (req, res, next) => {
+	const id = req.params.id;
+	const userInfo = await UserInfo.findById(id);
+	const ids = userInfo.saved;
+	ids.shift();
+
+	const posts = await Post.find({ _id: { $in: ids } });
+
+	if (!posts)
+		return res.json({ success: false, message: "No posts with that id" });
+
+	res.status(200).json({ success: true, data: posts });
+});
+
 // @desc        Add Like to Post
 // @route       PUT /api/v1/posts/like/:id/:uid
 // @access      Private
@@ -129,6 +146,54 @@ exports.removeLike = asyncHandler(async (req, res, next) => {
 	}
 
 	const nLPost = { likes: post.likes.filter(l => l !== uid) };
+	const nPost = await Post.findByIdAndUpdate(id, nLPost, { new: true });
+
+	if (!nPost) return res.json({ success: false, message: "No post" });
+
+	res.status(200).json({ success: true, data: nPost });
+});
+
+// @desc        Save Post
+// @route       PUT /api/v1/posts/save/:id/:uid
+// @access      Private
+exports.addSave = asyncHandler(async (req, res, next) => {
+	const id = req.params.id;
+	const uid = req.params.uid;
+	const post = await Post.findById(id);
+	const userInfo = await UserInfo.findById(uid);
+
+	const checkIfSaved = post.saved.filter(l => l === uid).length > 0;
+
+	if (!checkIfSaved) post.saved.push(uid);
+	userInfo.saved.push(id);
+
+	const nPost = await Post.findByIdAndUpdate(id, post, { new: true });
+	await UserInfo.findByIdAndUpdate(uid, userInfo, { new: true });
+
+	if (!nPost) return res.json({ success: false, message: "No post" });
+
+	res.status(200).json({ success: true, data: nPost });
+});
+
+// @desc        Remove Post Save
+// @route       PUT /api/v1/posts/unsave/:id/:uid
+// @access      Private
+exports.removeSave = asyncHandler(async (req, res, next) => {
+	const id = req.params.id;
+	const uid = req.params.uid;
+	const post = await Post.findById(id);
+	const userInfo = await UserInfo.findById(uid);
+
+	const checkIfSaved = post.saved.filter(l => l === uid).length > 0;
+
+	if (!checkIfSaved) {
+		return res.json({ success: false, message: "Not saved." });
+	}
+
+	const uInfo = { saved: userInfo.saved.filter(l => l !== id) };
+	const nLPost = { saved: post.saved.filter(l => l !== uid) };
+
+	await UserInfo.findByIdAndUpdate(uid, uInfo, { new: true });
 	const nPost = await Post.findByIdAndUpdate(id, nLPost, { new: true });
 
 	if (!nPost) return res.json({ success: false, message: "No post" });
