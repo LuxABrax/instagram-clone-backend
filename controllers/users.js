@@ -55,6 +55,25 @@ exports.getUserByName = asyncHandler(async (req, res, next) => {
 		res.status(200).json({ success: true, data: returnUser });
 });
 
+// @desc        Get user name and photo with id
+// @route       GET /api/v1/users/i/:id
+// @access      Private/Admin
+exports.getUserPhotoName = asyncHandler(async (req, res, next) => {
+	const user = await User.findById(req.params.id);
+	if (user.length === 0)
+		return res.json({ success: false, message: "No user with that id." });
+	console.log(user);
+	const { name, photo } = user;
+
+	const returnUser = {
+		name,
+		photo,
+	};
+
+	if (user.length !== 0)
+		res.status(200).json({ success: true, data: returnUser });
+});
+
 // @desc        Get single user with name
 // @route       GET /api/v1/users/fff
 // @access      Private/Admin

@@ -94,3 +94,44 @@ exports.getPostsFromFollowing = asyncHandler(async (req, res, next) => {
 
 	res.status(200).json({ success: true, data: posts });
 });
+
+// @desc        Add Like to Post
+// @route       PUT /api/v1/posts/like/:id/:uid
+// @access      Private
+exports.addLike = asyncHandler(async (req, res, next) => {
+	const id = req.params.id;
+	const uid = req.params.uid;
+	const post = await Post.findById(id);
+
+	const checkIfLiked = post.likes.filter(l => l === uid).length > 0;
+
+	if (!checkIfLiked) post.likes.push(uid);
+
+	const nPost = await Post.findByIdAndUpdate(id, post, { new: true });
+
+	if (!nPost) return res.json({ success: false, message: "No post" });
+
+	res.status(200).json({ success: true, data: nPost });
+});
+
+// @desc        Remove Like from Post
+// @route       PUT /api/v1/posts/dislike/:id/:uid
+// @access      Private
+exports.removeLike = asyncHandler(async (req, res, next) => {
+	const id = req.params.id;
+	const uid = req.params.uid;
+	const post = await Post.findById(id);
+
+	const checkIfLiked = post.likes.filter(l => l === uid).length > 0;
+
+	if (!checkIfLiked) {
+		return res.json({ success: false, message: "Not liked." });
+	}
+
+	const nLPost = { likes: post.likes.filter(l => l !== uid) };
+	const nPost = await Post.findByIdAndUpdate(id, nLPost, { new: true });
+
+	if (!nPost) return res.json({ success: false, message: "No post" });
+
+	res.status(200).json({ success: true, data: nPost });
+});

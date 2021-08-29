@@ -8,6 +8,7 @@ const {
 	getUserByName,
 	getUsersForFollowing,
 	uploadProfilePhoto,
+	getUserPhotoName,
 } = require("../controllers/users");
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.route("/:id").get(getUser).put(updateUser).delete(deleteUser);
 router.route("/:id/photo").put(uploadProfilePhoto);
 
 router.route("/n/:name").get(getUserByName);
+router.route("/i/:id").get(getUserPhotoName);
 
 module.exports = router;
