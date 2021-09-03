@@ -104,3 +104,87 @@ exports.login = asyncHandler(async (req, res, next) => {
 	}
 	res.status(200).json({ message: "User Logged In", user: user });
 });
+
+//@desc     Check Password
+//@route    POST /api/v1/auth/check
+//@access   Public
+exports.checkPassword = asyncHandler(async (req, res, next) => {
+	const { email, password } = req.body;
+	console.log("em pas: ", email, password);
+	if (!email || !password) {
+		return next(new ErrorResponse("Enter your email and password", 400));
+	}
+
+	let user = await User.findOne({ email }).select("+password");
+	if (!user) {
+		let name = email;
+		user = await User.findOne({ name }).select("+password");
+
+		if (!user) {
+			// return next(
+			// 	new ErrorResponse("No user with that email or username", 401)
+			// );
+			return res.json({
+				success: false,
+				message:
+					"The username you entered doesn't belong to an account. Please check your username and try again.",
+			});
+		}
+	}
+	console.log(user.password);
+	// const isMatch = user.password === password;
+
+	// Check if password matches
+	const isMatch = await user.matchPassword(password);
+
+	if (!isMatch) {
+		return res.json({
+			success: false,
+			message:
+				"Sorry, your password was incorrect. Please double-check your password",
+		});
+
+		// return next(new ErrorResponse("Invalid password", 401));
+	}
+	res.status(200).json({ success: true, message: "Password Correct" });
+});
+
+//@desc     Change Password
+//@route    PUT /api/v1/auth/change
+//@access   Public
+exports.changePassword = asyncHandler(async (req, res, next) => {
+	const { email, password, newPassword } = req.body;
+	console.log("em pas: ", email, password);
+	if (!email || !password || !newPassword) {
+		return next(new ErrorResponse("Enter your email and password", 400));
+	}
+
+	let user = await User.findOne({ email }).select("+password");
+	if (!user) {
+		let name = email;
+		user = await User.findOne({ name }).select("+password");
+		if (!user) {
+			return res.json({
+				success: false,
+				message:
+					"The username you entered doesn't belong to an account. Please check your username and try again.",
+			});
+		}
+	}
+	console.log(user.password);
+
+	// Check if password matches
+	const isMatch = await user.matchPassword(password);
+
+	if (!isMatch) {
+		return res.json({
+			success: false,
+			message:
+				"Sorry, your password was incorrect. Please double-check your password",
+		});
+	} else {
+		user.password = newPassword;
+		await user.save();
+		res.status(200).json({ success: true, message: "Password Updated" });
+	}
+});
