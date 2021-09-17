@@ -2,6 +2,7 @@ const asyncHandler = require("../middleware/async");
 const User = require("../models/User");
 const UserInfo = require("../models/UserInfo");
 const { checkIfFollowing, reformatUser } = require("../helpers/followers");
+const Post = require("../models/Post");
 
 // @desc        UnFollow another user
 // @route       PUT /api/v1/follow/unf/:id/:fid
@@ -215,4 +216,71 @@ exports.getFollowingUsers = asyncHandler(async (req, res, next) => {
 	});
 
 	res.status(200).json({ success: true, users: newUsers });
+});
+
+// @desc        Check if following user
+// @route       GET /api/v1/follow/:id/isfollowing/:fid
+// @access      Public
+exports.checkIfUserIsFollowing = asyncHandler(async (req, res, next) => {
+	const { id, fid } = req.params;
+
+	if (id === fid)
+		return res.json({ success: false, message: "ID's are identical" });
+
+	const isFollowing = await checkIfFollowing(id, fid);
+
+	if (isFollowing)
+		return res.status(200).json({ success: true, isfollowing: true });
+
+	res.status(200).json({ success: true, isfollowing: false });
+});
+
+// @desc        Get Popup info
+// @route       GET /api/v1/follow/popup/:id/:fid
+// @access      Public
+exports.getPopupInfo = asyncHandler(async (req, res, next) => {
+	const { id, fid } = req.params;
+
+	if (id === fid)
+		return res.json({ success: false, message: "ID's are identical" });
+
+	const user = await User.find({ _id: fid });
+
+	if (user.length === 0)
+		return res.json({ success: false, message: "No user with that id." });
+
+	const isFollowing = await checkIfFollowing(id, fid);
+
+	const {
+		_id,
+		name,
+		photo,
+		fullName,
+		description,
+		posts,
+		followers,
+		following,
+	} = user[0];
+
+	const fPosts = await Post.find({ uId: fid });
+	let postGallery = [];
+
+	if (fPosts)
+		fPosts.map((p, idx) => {
+			if (idx <= 2) postGallery.push({ id: p._id, photo: p.photo });
+		});
+
+	const returnPopup = {
+		_id,
+		name,
+		photo,
+		fullName,
+		posts,
+		followers,
+		following,
+		isFollowing,
+		postGallery,
+	};
+
+	res.status(200).json({ success: true, popupInfo: returnPopup });
 });
