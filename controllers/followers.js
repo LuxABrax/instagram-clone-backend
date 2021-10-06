@@ -241,9 +241,6 @@ exports.checkIfUserIsFollowing = asyncHandler(async (req, res, next) => {
 exports.getPopupInfo = asyncHandler(async (req, res, next) => {
 	const { id, fid } = req.params;
 
-	if (id === fid)
-		return res.json({ success: false, message: "ID's are identical" });
-
 	const user = await User.find({ _id: fid });
 
 	if (user.length === 0)

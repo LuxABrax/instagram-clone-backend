@@ -86,6 +86,7 @@ exports.getPostsFromFollowing = asyncHandler(async (req, res, next) => {
 	const userInfo = await UserInfo.findById(id);
 	const ids = userInfo.following;
 	ids.shift();
+	ids.unshift(id);
 	console.log(ids);
 	const posts = await Post.find({ uId: { $in: ids } });
 
