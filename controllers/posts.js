@@ -33,7 +33,7 @@ exports.uploadPhotoPost = asyncHandler(async (req, res, next) => {
 	// Create custom filename
 	const r = Math.floor(Math.random() * 100);
 	const r1 = Math.floor(Math.random() * 200 + 10);
-	console.log(r, r1);
+
 	file.name = `post_${user._id}${r}${r1}${path.parse(file.name).ext}`;
 
 	file.mv(`${process.env.FILE_UPLOAD_PATH}/posts/${file.name}`, async err => {
@@ -48,6 +48,15 @@ exports.uploadPhotoPost = asyncHandler(async (req, res, next) => {
 			description,
 			photo: file.name,
 		});
+
+		// Update post number
+		const postNum = user.posts + 1;
+		await User.findOneAndUpdate(
+			user._id.toString(),
+			{ posts: postNum },
+			{ new: true }
+		);
+
 		res.status(200).json({ success: true, data: post });
 	});
 });
@@ -93,7 +102,7 @@ exports.getPostsFromFollowing = asyncHandler(async (req, res, next) => {
 	if (!posts)
 		return res.json({ success: false, message: "No posts with that id" });
 
-	res.status(200).json({ success: true, data: posts });
+	res.status(200).json({ success: true, data: posts.reverse() });
 });
 
 // @desc        Get Saved posts
