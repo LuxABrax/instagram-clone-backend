@@ -87,6 +87,21 @@ exports.getPosts = asyncHandler(async (req, res, next) => {
 	res.status(200).json({ success: true, data: posts });
 });
 
+// @desc        Get posts on Explore
+// @route       GET /api/v1/posts/explore/:id
+// @access      Private
+exports.getExplorePosts = asyncHandler(async (req, res, next) => {
+	const id = req.params.id;
+
+	const posts = await Post.find({ uId: { $ne: id } });
+
+	posts.sort(() => Math.random() - 0.5);
+
+	if (!posts) return res.json({ success: false, message: "No posts" });
+
+	res.status(200).json({ success: true, data: posts });
+});
+
 // @desc        Get posts by following users
 // @route       GET /api/v1/posts/following/:id
 // @access      Private

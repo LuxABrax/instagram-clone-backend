@@ -16,6 +16,7 @@ const {
 	addSave,
 	removeSave,
 	getSavedPosts,
+	getExplorePosts,
 	addComment,
 } = require("../controllers/posts");
 
@@ -24,6 +25,7 @@ const router = express.Router();
 // router.route("/").get(getUsers).post(createUser);
 // router.route("/:id").get(getUser).put(updateUser).delete(deleteUser);
 router.route("/post/:id").post(uploadPhotoPost);
+router.route("/explore/:id").get(getExplorePosts);
 router.route("/profile/:id").get(getPosts);
 router.route("/following/:id").get(getPostsFromFollowing);
 router.route("/saved/:id").get(getSavedPosts);
