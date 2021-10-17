@@ -2,6 +2,7 @@ const asyncHandler = require("../middleware/async");
 const ErrorResponse = require("../utils/errorResponse");
 const User = require("../models/User");
 const UserInfo = require("../models/UserInfo");
+const Searches = require("../models/Searches");
 
 //@desc     Register user
 //@route    POST /api/v1/auth/register
@@ -31,6 +32,10 @@ exports.register = asyncHandler(async (req, res, next) => {
 			followers: "[]",
 			following: "[]",
 			saved: "[]",
+		});
+		await Searches.create({
+			_id: user._id,
+			searches: "[]",
 		});
 		console.log(userInfo);
 

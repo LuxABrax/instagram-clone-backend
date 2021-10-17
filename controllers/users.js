@@ -79,9 +79,9 @@ exports.getUserPhotoName = asyncHandler(async (req, res, next) => {
 // @access      Private/Admin
 exports.getUsersForFollowing = asyncHandler(async (req, res, next) => {
 	const { id } = req.body;
-	const users = await User.find();
+
 	const userInfos = await UserInfo.find();
-	const returnUsers = [];
+
 	console.log(id);
 	for (userInfo of userInfos) {
 		// console.log(userInfo);

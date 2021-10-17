@@ -19,6 +19,7 @@ const auth = require("./routes/auth");
 const users = require("./routes/users");
 const followers = require("./routes/followers");
 const posts = require("./routes/posts");
+const searches = require("./routes/searches");
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/v1/auth", auth);
 app.use("/api/v1/users", users);
 app.use("/api/v1/follow", followers);
 app.use("/api/v1/posts", posts);
+app.use("/api/v1/searches", searches);
 
 app.use(errorHandler);
 
