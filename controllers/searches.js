@@ -14,13 +14,17 @@ exports.addSearch = asyncHandler(async (req, res, next) => {
 			_id: id,
 			searches: `${sid}`,
 		});
-		return res.status(201).json({ success: true, data: newS });
+		return res.status(201).json({ success: true, data: newS.searches });
 	}
 
 	const alreadySearched = searches.searches.filter(s => s === sid).length > 0;
 
 	if (alreadySearched)
-		return res.status(201).json({ success: true, data: searches });
+		return res.status(201).json({
+			success: false,
+			message: "Already searched",
+			data: searches.searches,
+		});
 
 	searches.searches.push(sid);
 
@@ -30,7 +34,7 @@ exports.addSearch = asyncHandler(async (req, res, next) => {
 		{ new: true }
 	);
 
-	res.status(201).json({ success: true, data: newSearches });
+	res.status(201).json({ success: true, data: newSearches.searches });
 });
 
 // @desc        Delete 1 search
@@ -48,7 +52,11 @@ exports.deleteSearch = asyncHandler(async (req, res, next) => {
 		});
 		return res
 			.status(201)
-			.json({ success: false, message: "No searches yet", data: newS });
+			.json({
+				success: false,
+				message: "No searches yet",
+				data: newS.searches,
+			});
 	}
 
 	if (searches.searches.length === 0)
@@ -63,7 +71,11 @@ exports.deleteSearch = asyncHandler(async (req, res, next) => {
 	if (isNotSearched)
 		return res
 			.status(201)
-			.json({ success: false, message: "Not searched", data: searches });
+			.json({
+				success: false,
+				message: "Not searched",
+				data: searches.searches,
+			});
 
 	const searchesRemoved = searches.searches.filter(s => s !== sid);
 
@@ -76,7 +88,7 @@ exports.deleteSearch = asyncHandler(async (req, res, next) => {
 	res.status(201).json({
 		success: true,
 		message: "Removed from searches",
-		data: newSearches,
+		data: newSearches.searches,
 	});
 });
 
@@ -114,7 +126,7 @@ exports.deleteSearches = asyncHandler(async (req, res, next) => {
 	res.status(201).json({
 		success: true,
 		message: "Removed all searches",
-		data: newSearches,
+		data: newSearches.searches,
 	});
 });
 
