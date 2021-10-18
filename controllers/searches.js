@@ -9,7 +9,7 @@ exports.addSearch = asyncHandler(async (req, res, next) => {
 
 	const searches = await Searches.findById(id);
 
-	if (searches === null) {
+	if ((await searches) === null) {
 		let newS = await Searches.create({
 			_id: id,
 			searches: `${sid}`,
@@ -28,7 +28,7 @@ exports.addSearch = asyncHandler(async (req, res, next) => {
 
 	searches.searches.push(sid);
 
-	const newSearches = await Searches.findOneAndUpdate(
+	const newSearches = await Searches.findByIdAndUpdate(
 		id,
 		{ searches: searches.searches },
 		{ new: true }
@@ -50,13 +50,11 @@ exports.deleteSearch = asyncHandler(async (req, res, next) => {
 			_id: id,
 			searches: "[]",
 		});
-		return res
-			.status(201)
-			.json({
-				success: false,
-				message: "No searches yet",
-				data: newS.searches,
-			});
+		return res.status(201).json({
+			success: false,
+			message: "No searches yet",
+			data: newS.searches,
+		});
 	}
 
 	if (searches.searches.length === 0)
@@ -69,17 +67,15 @@ exports.deleteSearch = asyncHandler(async (req, res, next) => {
 	const isNotSearched = searches.searches.filter(s => s === sid).length === 0;
 
 	if (isNotSearched)
-		return res
-			.status(201)
-			.json({
-				success: false,
-				message: "Not searched",
-				data: searches.searches,
-			});
+		return res.status(201).json({
+			success: false,
+			message: "Not searched",
+			data: searches.searches,
+		});
 
 	const searchesRemoved = searches.searches.filter(s => s !== sid);
 
-	const newSearches = await Searches.findOneAndUpdate(
+	const newSearches = await Searches.findByIdAndUpdate(
 		id,
 		{ searches: searchesRemoved },
 		{ new: true }
@@ -117,7 +113,7 @@ exports.deleteSearches = asyncHandler(async (req, res, next) => {
 			data: searches.searches,
 		});
 
-	const newSearches = await Searches.findOneAndUpdate(
+	const newSearches = await Searches.findByIdAndUpdate(
 		id,
 		{ searches: [] },
 		{ new: true }
@@ -145,7 +141,7 @@ exports.getSearches = asyncHandler(async (req, res, next) => {
 		});
 		return res
 			.status(201)
-			.json({ success: true, message: "No searches yet", data: newS });
+			.json({ success: true, message: "No searches yet", data: newS.searches });
 	}
 
 	if (searches.searches.length === 0)
