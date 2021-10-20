@@ -15,50 +15,66 @@ exports.uploadPhotoPost = asyncHandler(async (req, res, next) => {
 		return res.json({ success: false, message: "Please upload a photo" });
 	}
 
-	const file = req.files.file;
+	const fileNames = [];
 
-	// Make sure the image is a photo
-	if (!file.mimetype.startsWith("image")) {
-		return res.json({ success: false, message: "Please upload an image file" });
-	}
+	const hasMultipleFiles = req.files.files.length > 1;
 
-	// Check file size
-	if (file.size > process.env.MAX_FILE_UPLOAD) {
-		return res.json({
-			success: false,
-			message: `Please upload an image less than ${process.env.MAX_FILE_UPLOAD} Bytes`,
-		});
-	}
+	const files = hasMultipleFiles ? req.files.files : [req.files.files];
 
-	// Create custom filename
-	const r = Math.floor(Math.random() * 100);
-	const r1 = Math.floor(Math.random() * 200 + 10);
-
-	file.name = `post_${user._id}${r}${r1}${path.parse(file.name).ext}`;
-
-	file.mv(`${process.env.FILE_UPLOAD_PATH}/posts/${file.name}`, async err => {
-		if (err) {
-			console.error(err);
-			return res.json({ success: false, message: "Problem with file upload" });
+	files.forEach(file => {
+		// Make sure the file is an image
+		if (!file.mimetype.startsWith("image")) {
+			return res.json({
+				success: false,
+				message: "Please upload an image file",
+			});
 		}
 
-		const post = await Post.create({
-			name: user.name,
-			uId: user._id,
-			description,
-			photo: file.name,
+		// Check file size
+		if (file.size > process.env.MAX_FILE_UPLOAD) {
+			return res.json({
+				success: false,
+				message: `Please upload an image less than ${process.env.MAX_FILE_UPLOAD} Bytes`,
+			});
+		}
+
+		// Create custom filename
+		const r = Math.floor(Math.random() * 100);
+		const r1 = Math.floor(Math.random() * 200 + 10);
+
+		file.name = `post_${user._id}${r}${r1}${path.parse(file.name).ext}`;
+
+		fileNames.push(file.name);
+
+		file.mv(`${process.env.FILE_UPLOAD_PATH}/posts/${file.name}`, async err => {
+			if (err) {
+				console.error(err);
+				return res.json({
+					success: false,
+					message: "Problem with file upload",
+				});
+			}
 		});
-
-		// Update post number
-		const postNum = user.posts + 1;
-		await User.findOneAndUpdate(
-			user._id.toString(),
-			{ posts: postNum },
-			{ new: true }
-		);
-
-		res.status(200).json({ success: true, data: post });
 	});
+
+	const post = await Post.create({
+		name: user.name,
+		uId: user._id,
+		description,
+		photo: fileNames[0],
+		isCarousel: hasMultipleFiles,
+		photos: fileNames.slice(1),
+	});
+
+	// Update post number
+	const postNum = user.posts + 1;
+	await User.findOneAndUpdate(
+		user._id.toString(),
+		{ posts: postNum },
+		{ new: true }
+	);
+
+	res.status(200).json({ success: true, data: post });
 });
 
 // @desc        Get post

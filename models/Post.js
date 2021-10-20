@@ -10,6 +10,12 @@ const PostSchema = new mongoose.Schema({
 	photo: {
 		type: String,
 	},
+	isCarousel: {
+		type: Boolean,
+	},
+	photos: {
+		type: [String],
+	},
 	description: {
 		type: String,
 	},
