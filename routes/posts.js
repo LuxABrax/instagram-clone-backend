@@ -1,12 +1,5 @@
 const express = require("express");
 const {
-	// getUsers,
-	// getUser,
-	// createUser,
-	// updateUser,
-	// deleteUser,
-	// getUserByName,
-	// getUsersForFollowing,
 	getPost,
 	getPosts,
 	uploadPhotoPost,
@@ -22,8 +15,6 @@ const {
 
 const router = express.Router();
 
-// router.route("/").get(getUsers).post(createUser);
-// router.route("/:id").get(getUser).put(updateUser).delete(deleteUser);
 router.route("/post/:id").post(uploadPhotoPost);
 router.route("/explore/:id").get(getExplorePosts);
 router.route("/profile/:id").get(getPosts);
@@ -35,7 +26,5 @@ router.route("/save/:id/:uid").put(addSave);
 router.route("/unsave/:id/:uid").put(removeSave);
 router.route("/comment/:id").put(addComment);
 router.route("/:id").get(getPost);
-
-// router.route("/n/:name").get(getUserByName);
 
 module.exports = router;

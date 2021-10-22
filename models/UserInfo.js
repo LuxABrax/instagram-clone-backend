@@ -5,6 +5,7 @@ const UserInfoSchema = new mongoose.Schema({
 	posts: { type: [String] },
 	followers: { type: [String] },
 	following: { type: [String] },
+	stories: { type: [String] },
 	saved: { type: [String] },
 });
 

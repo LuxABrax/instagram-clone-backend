@@ -20,6 +20,7 @@ const users = require("./routes/users");
 const followers = require("./routes/followers");
 const posts = require("./routes/posts");
 const searches = require("./routes/searches");
+const stories = require("./routes/stories");
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/v1/users", users);
 app.use("/api/v1/follow", followers);
 app.use("/api/v1/posts", posts);
 app.use("/api/v1/searches", searches);
+app.use("/api/v1/stories", stories);
 
 app.use(errorHandler);
 

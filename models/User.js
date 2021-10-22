@@ -32,6 +32,7 @@ const UserSchema = new mongoose.Schema({
 	posts: { type: Number, default: 0 },
 	followers: { type: Number, default: 0 },
 	following: { type: Number, default: 0 },
+	hasStory: { type: Boolean, default: false },
 	photo: {
 		type: String,
 		default: "no-photo.jpg",

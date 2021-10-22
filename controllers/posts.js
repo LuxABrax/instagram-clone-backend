@@ -68,9 +68,14 @@ exports.uploadPhotoPost = asyncHandler(async (req, res, next) => {
 
 	// Update post number
 	const postNum = user.posts + 1;
-	await User.findOneAndUpdate(
+	await User.findByIdAndUpdate(
 		user._id.toString(),
 		{ posts: postNum },
+		{ new: true }
+	);
+	await UserInfo.findByIdAndUpdate(
+		user._id.toString(),
+		{ $addToSet: { posts: [post._id.toString()] } },
 		{ new: true }
 	);
 
