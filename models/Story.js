@@ -13,6 +13,10 @@ const StorySchema = new mongoose.Schema({
 	seen: {
 		type: [String],
 	},
+	isActive: {
+		type: Boolean,
+		default: true,
+	},
 	createdAt: {
 		type: Date,
 		default: Date.now,
