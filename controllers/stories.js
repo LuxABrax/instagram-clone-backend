@@ -185,7 +185,7 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 		};
 
 		checkedStories.map(s => {
-			const isSeen = s.seen.filter(i => i === currentUser._id).length > 0;
+			const isSeen = s.seen.filter(i => i === uid).length > 0;
 			if (isSeen === false) userObj.user.hasUnseen = true;
 
 			const storyObj = {
