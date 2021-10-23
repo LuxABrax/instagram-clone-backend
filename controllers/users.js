@@ -62,7 +62,7 @@ exports.getUserPhotoName = asyncHandler(async (req, res, next) => {
 	const user = await User.findById(req.params.id);
 	if (user.length === 0)
 		return res.json({ success: false, message: "No user with that id." });
-	console.log(user);
+	// console.log(user);
 	const { name, photo } = user;
 
 	const returnUser = {
@@ -82,12 +82,12 @@ exports.getUsersForFollowing = asyncHandler(async (req, res, next) => {
 
 	const userInfos = await UserInfo.find();
 
-	console.log(id);
+	// console.log(id);
 	for (userInfo of userInfos) {
 		// console.log(userInfo);
 		let fString = userInfo.followers;
 		let followersList = fString.substring(2, fString.length - 2).split(",");
-		console.log(followersList);
+		// console.log(followersList);
 		followersList.forEach(fol => {
 			if (fol === id) console.log("inside");
 		});

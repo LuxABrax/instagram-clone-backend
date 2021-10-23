@@ -37,7 +37,7 @@ exports.register = asyncHandler(async (req, res, next) => {
 			_id: user._id,
 			searches: "[]",
 		});
-		console.log(userInfo);
+		// console.log(userInfo);
 
 		res.status(200).json({ message: "User Created", user: user });
 	}

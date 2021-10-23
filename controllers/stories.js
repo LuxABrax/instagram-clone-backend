@@ -131,8 +131,9 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 	// For each user find stories and return them sorted
 	const usersWithStoriesArr = [];
 
-	uIds.forEach(async uID => {
-		const userWithStoryInfo = await UserInfo.findById(uID);
+	let idsLen = uIds.length;
+	uIds.forEach(async uId => {
+		const userWithStoryInfo = await UserInfo.findById(uId);
 
 		const stories = await Story.find({
 			_id: { $in: userWithStoryInfo.stories },
@@ -140,19 +141,38 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 
 		const activeStories = stories.filter(s => s.isActive);
 
-		// Filter stories that are posted less than 24 hours ago
-		const checkedStories = activeStories.filter(s => {
-			const storyDate = new Date(s.createdAt);
+		if (activeStories.length === 0) {
+			idsLen -= 1;
+			return;
+		}
+
+		const notActive = [];
+
+		const removeOldStories = story => {
+			const storyDate = new Date(story.createdAt);
 			const now = new Date(Date.now());
 			const diff = Math.abs(now - storyDate) / (1000 * 60 * 60);
 
 			if (diff >= 24) {
-				Story.findByIdAndUpdate(s._id, { isActive: false }, { new: true });
+				notActive.push(story.id);
+				return false;
 			}
-			if (diff < 24) return s;
+			return true;
+		};
+
+		// Filter stories that are posted less than 24 hours ago
+		const checkedStories = activeStories.filter(s => removeOldStories(s));
+
+		notActive.forEach(async id => {
+			await Story.findByIdAndUpdate(id, { isActive: false }, { new: true });
 		});
 
-		const currentUser = await User.findById(uID);
+		if (checkedStories.length === 0) {
+			idsLen -= 1;
+			return;
+		}
+
+		const currentUser = await User.findById(uId);
 		const userObj = {
 			user: {
 				id: currentUser._id.toString(),
@@ -185,7 +205,8 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 
 		usersWithStoriesArr.push(userObj);
 
-		if (usersWithStoriesArr.length === uIds.length) {
+		if (usersWithStoriesArr.length === idsLen) {
+			console.log(usersWithStoriesArr);
 			const data = await JSON.stringify(usersWithStoriesArr);
 			return res.status(200).json({
 				success: true,
@@ -193,4 +214,11 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 			});
 		}
 	});
+
+	if (usersWithStoriesArr.length === idsLen)
+		res.status(200).json({
+			success: false,
+			message: "No stories",
+			data: [],
+		});
 });
