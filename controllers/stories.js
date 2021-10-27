@@ -3,6 +3,7 @@ const Story = require("../models/Story");
 const User = require("../models/User");
 const UserInfo = require("../models/UserInfo");
 const path = require("path");
+const { sortUnseenAndSeenStories } = require("../helpers/stories");
 
 // @desc        Upload photo story
 // @route       POST /api/v1/stories/story/:id/
@@ -148,7 +149,7 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 
 		const notActive = [];
 
-		const removeOldStories = story => {
+		const checkIfStoryTooOld = story => {
 			const storyDate = new Date(story.createdAt);
 			const now = new Date(Date.now());
 			const diff = Math.abs(now - storyDate) / (1000 * 60 * 60);
@@ -161,7 +162,7 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 		};
 
 		// Filter stories that are posted less than 24 hours ago
-		const checkedStories = activeStories.filter(s => removeOldStories(s));
+		const checkedStories = activeStories.filter(s => checkIfStoryTooOld(s));
 
 		notActive.forEach(async id => {
 			await Story.findByIdAndUpdate(id, { isActive: false }, { new: true });
@@ -207,7 +208,8 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 
 		if (usersWithStoriesArr.length === idsLen) {
 			console.log(usersWithStoriesArr);
-			const data = await JSON.stringify(usersWithStoriesArr);
+			const sortedStories = sortUnseenAndSeenStories(usersWithStoriesArr);
+			const data = await JSON.stringify(sortedStories);
 			return res.status(200).json({
 				success: true,
 				data: data,
