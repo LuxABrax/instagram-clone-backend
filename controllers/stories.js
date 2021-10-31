@@ -207,7 +207,6 @@ exports.getUsersWithStories = asyncHandler(async (req, res, next) => {
 		usersWithStoriesArr.push(userObj);
 
 		if (usersWithStoriesArr.length === idsLen) {
-			console.log(usersWithStoriesArr);
 			const sortedStories = sortUnseenAndSeenStories(usersWithStoriesArr);
 			const data = await JSON.stringify(sortedStories);
 			return res.status(200).json({
