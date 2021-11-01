@@ -8,21 +8,23 @@ const errorHandler = require("./middleware/error");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const path = require("path");
+const http = require("http");
+// const socketio = require("socket.io");
+const socketio = require("socket.io");
 
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
+const PORT = process.env.PORT || 5000;
 
 // Connect to database
 connectDB();
 
-const auth = require("./routes/auth");
-const users = require("./routes/users");
-const followers = require("./routes/followers");
-const posts = require("./routes/posts");
-const searches = require("./routes/searches");
-const stories = require("./routes/stories");
+const router = require("./routes/router");
 
 const app = express();
+const server = http.createServer(app);
+// const io = socketio(server);
+const io = socketio(server);
 
 app.use(cors());
 // Body parser
@@ -43,18 +45,20 @@ app.use(fileUpload());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routers
-app.use("/api/v1/auth", auth);
-app.use("/api/v1/users", users);
-app.use("/api/v1/follow", followers);
-app.use("/api/v1/posts", posts);
-app.use("/api/v1/searches", searches);
-app.use("/api/v1/stories", stories);
-
+app.use("/api/v1", router);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+// io.on("connection", socket => {
+// 	console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+// });
+io.on("connection", socket => {
+	console.log("connected");
+	socket.on("disconnect", () => {
+		console.log("user disconnected");
+	});
+});
 
-const server = app.listen(
+const serverM = server.listen(
 	PORT,
 	console.log(
 		`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
@@ -65,7 +69,7 @@ const server = app.listen(
 process.on("unhandledRejection", (err, promise) => {
 	console.log(`Error: ${err.message}`.red.bold);
 	// CLose server & exit process
-	server.close(() => {
+	serverM.close(() => {
 		process.exit(1);
 	});
 });
